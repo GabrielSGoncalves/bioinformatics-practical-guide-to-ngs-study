@@ -1,0 +1,27 @@
+services:
+  sra-tools:
+    image: ncbi/sra-tools:latest
+    # The SRA tools are one-shot commands, so this service is meant to be
+    # invoked with `docker compose run --rm sra-tools <tool> [args]`.
+    # `command` below is just a sensible default if you run it with no args.
+    working_dir: /output
+    volumes:
+      # Reads/FASTQ are written into ./fastqs on the host (working dir = /output),
+      # matching the book's `mkdir fastqs && cd fastqs` workflow.
+      - ./fastqs:/output:rw
+      # Persist the prefetch cache between runs instead of re-downloading.
+      - sra-cache:/root/.ncbi
+    command: ["vdb-config", "--cfg"]
+
+  fastqc:
+    image: staphb/fastqc:0.12.1
+    # FastQC is also a one-shot command:
+    #   docker compose run --rm fastqc fastqc SRR030834.fastq
+    # Reports are written next to the input, into ./fastqs on the host.
+    working_dir: /data
+    volumes:
+      - ./fastqs:/data:rw
+    command: ["fastqc", "--version"]
+
+volumes:
+  sra-cache:

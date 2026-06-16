@@ -1,0 +1,12 @@
+# Sequencing data / tool output — too large for git
+fastqs/*
+!fastqs/.gitkeep
+*.sra
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+
+# FastQC / QC reports
+*_fastqc.html
+*_fastqc.zip
