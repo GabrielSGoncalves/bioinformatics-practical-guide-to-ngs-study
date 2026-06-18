@@ -10,3 +10,23 @@ fastqs/*
 # FastQC / QC reports
 *_fastqc.html
 *_fastqc.zip
+
+# Reference genomes + aligner/samtools indexes — too large for git
+refgenome/*
+!refgenome/.gitkeep
+*.fna
+*.fna.gz
+*.fa
+*.fa.gz
+*.fasta
+*.amb
+*.ann
+*.bwt
+*.pac
+*.sa
+*.fai
+
+# Alignment output
+*.sam
+*.bam
+*.bai

@@ -23,5 +23,53 @@ services:
       - ./fastqs:/data:rw
     command: ["fastqc", "--version"]
 
+  fastx-toolkit:
+    image: quay.io/biocontainers/fastx_toolkit:0.0.13--0
+    # FASTX-Toolkit tools are one-shot commands, e.g.:
+    #   docker compose run --rm fastx-toolkit fastx_quality_stats -i SRR030834.fastq -o stats.txt
+    # Output is written into ./fastqs on the host.
+    working_dir: /data
+    volumes:
+      - ./fastqs:/data:rw
+    command: ["fastx_quality_stats", "-h"]
+
+  trimmomatic:
+    image: staphb/trimmomatic:0.39
+    # Trimmomatic is a one-shot command too. The image ships a `trimmomatic`
+    # wrapper (java -jar trimmomatic-0.39.jar), e.g.:
+    #   docker compose run --rm trimmomatic trimmomatic SE -phred33 \
+    #     bad.fastq bad_trimmed.fastq SLIDINGWINDOW:4:20 MINLEN:36
+    # Bundled adapter FASTAs live in the image at /Trimmomatic-0.39/adapters/.
+    working_dir: /data
+    volumes:
+      - ./fastqs:/data:rw
+    command: ["trimmomatic", "-version"]
+
+  bwa:
+    image: staphb/bwa:0.7.17
+    # BWA maps reads to a reference genome. One-shot commands, e.g.:
+    #   docker compose run --rm bwa bwa index /ref/GRCh38.p13_genomic.fna
+    #   docker compose run --rm bwa bwa mem -o aln.sam /ref/GRCh38.p13_genomic.fna SRR030834.fastq
+    # Reference genome + its index live in ./refgenome -> /ref; reads and the
+    # SAM output live in ./fastqs -> /data (which is the working dir).
+    working_dir: /data
+    volumes:
+      - ./refgenome:/ref:rw
+      - ./fastqs:/data:rw
+    command: ["bwa"]
+
+  samtools:
+    image: staphb/samtools:1.21
+    # samtools manipulates SAM/BAM alignment files. One-shot commands, e.g.:
+    #   docker compose run --rm samtools samtools sort -o aln.sorted.bam aln.sam
+    #   docker compose run --rm samtools samtools index aln.sorted.bam
+    #   docker compose run --rm samtools samtools faidx /ref/GRCh38.p13_genomic.fna
+    # Same mounts as bwa: reference -> /ref, alignments/output -> /data.
+    working_dir: /data
+    volumes:
+      - ./refgenome:/ref:rw
+      - ./fastqs:/data:rw
+    command: ["samtools", "--version"]
+
 volumes:
   sra-cache:
